@@ -1,0 +1,62 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PricingRules {
+  id                   Int   @id @default(1)
+  lowStockKg           Float @default(50) @map("low_stock_kg")
+  lowStockSurgePct     Float @default(20) @map("low_stock_surge_pct")
+  highStockKg          Float @default(1000) @map("high_stock_kg")
+  highStockDiscountPct Float @default(15) @map("high_stock_discount_pct")
+  expiryDays           Int   @default(3) @map("expiry_days")
+  expiryDiscountPct    Float @default(25) @map("expiry_discount_pct")
+
+  @@map("pricing_rules")
+}
+
+model ProductPricing {
+  productId    String         @id @map("product_id")
+  name         String
+  basePrice    Int            @map("base_price")
+  currentPrice Int            @map("current_price")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  batches      PricingBatch[]
+
+  @@map("product_pricing")
+}
+
+model PricingBatch {
+  batchId           String         @id @map("batch_id")
+  productId         String         @map("product_id")
+  product           ProductPricing @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  quantityAvailable Float          @map("quantity_available")
+  expiryEstimate    String         @map("expiry_estimate")
+
+  @@index([productId])
+  @@map("pricing_batches")
+}
+
+model PriceHistory {
+  id        String   @id @default(uuid())
+  productId String   @map("product_id")
+  price     Int
+  reason    String
+  at        DateTime @default(now())
+
+  @@index([productId, at])
+  @@map("price_history")
+}
+
+model ProcessedEvent {
+  eventId     String   @id @map("event_id")
+  eventType   String   @map("event_type")
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("processed_events")
+}

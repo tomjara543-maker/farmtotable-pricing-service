@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: farmtotable-pricing-service
+    runtime: docker
+    region: virginia
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: SERVICE_NAME
+        value: pricing-service
+      - key: DATABASE_URL
+        sync: false
+      - key: RABBITMQ_URL
+        sync: false
+      - key: INTERNAL_TOKEN
+        sync: false
